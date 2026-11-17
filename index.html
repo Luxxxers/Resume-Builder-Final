@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Career Studio | ATS Resume Builder</title>
+
+    <!-- APPLICATION STYLES -->
+    <style>
+        :root{
+            --bg:#f3f5fa;--surface:#fff;--surface-2:#f7f8fc;--text:#182135;--muted:#697386;
+            --border:#dfe5ee;--primary:#6558e8;--primary-dark:#4e42c7;--success:#147a53;
+            --danger:#bd4052;--shadow:0 12px 36px rgba(28,39,68,.07);
+        }
+        *{box-sizing:border-box}
+        body{margin:0;min-width:320px;background:var(--bg);color:var(--text);
+            font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+        button,input,textarea,select{font:inherit}
+        button{cursor:pointer}
+        [hidden]{display:none!important}
+        .app{width:min(1600px,100%);margin:auto;padding:24px}
+        .topbar,.brand,.actions,.section-actions,.document-toolbar,.entry-header,.import-actions{display:flex;align-items:center}
+        .topbar,.document-toolbar,.section-actions,.entry-header{justify-content:space-between;gap:14px}
+        .topbar{margin-bottom:20px}
+        .brand{gap:12px}
+        .logo{display:grid;place-items:center;width:45px;height:45px;border-radius:14px;
+            background:linear-gradient(135deg,var(--primary),#9482ef);color:#fff;font-weight:900}
+        .brand h1{margin:0 0 3px;font-size:20px;letter-spacing:-.04em}
+        .brand p,.heading p,.document-toolbar p,.section-intro{margin:0;color:var(--muted);font-size:11px;line-height:1.55}
+        .actions,.import-actions{flex-wrap:wrap;gap:7px}
+        .save-status{margin-right:5px;color:var(--muted);font-size:11px}
+        .btn{padding:9px 13px;border:1px solid var(--border);border-radius:9px;background:var(--surface);
+            color:var(--text);font-size:12px;font-weight:700;transition:.16s ease}
+        .btn:hover{border-color:var(--primary);transform:translateY(-1px)}
+        .btn-primary{border-color:var(--primary);background:var(--primary);color:#fff}
+        .btn-primary:hover{background:var(--primary-dark)}
+        .btn-danger{color:var(--danger)}
+        .btn-small{padding:7px 10px;font-size:11px}
+        .main-nav{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+        .nav-button{display:flex;align-items:center;gap:12px;padding:14px 16px;border:1px solid var(--border);
+            border-radius:14px;background:var(--surface);color:var(--text);text-align:left}
+        .nav-button.active{border-color:var(--primary);background:#f1efff}
+        .nav-icon{display:grid;place-items:center;width:35px;height:35px;border-radius:10px;background:var(--surface-2);font-weight:850}
+        .nav-button.active .nav-icon{background:var(--primary);color:#fff}
+        .nav-button strong,.nav-button small{display:block}
+        .nav-button strong{margin-bottom:3px;font-size:13px}
+        .nav-button small{color:var(--muted);font-size:11px}
+        .workspace{display:grid;grid-template-columns:minmax(350px,.9fr) minmax(430px,1.1fr);gap:16px;align-items:start}
+        .panel{border:1px solid var(--border);border-radius:16px;background:var(--surface);box-shadow:var(--shadow)}
+        .editor{padding:21px}
+        .heading{margin-bottom:17px}
+        .heading h2{margin:0 0 6px;font-size:20px;letter-spacing:-.035em}
+        .eyebrow{display:block;margin-bottom:6px;color:var(--primary);font-size:9px;font-weight:900;letter-spacing:.13em}
+        .autoload-box{padding:15px;margin-bottom:14px;border:1px solid #dcd6ff;border-radius:13px;background:#f8f6ff}
+        .autoload-box h3{margin:0 0 5px;font-size:13px}
+        .autoload-box>p{margin:0 0 12px;color:var(--muted);font-size:10px;line-height:1.55}
+        .protected-note{padding:10px;margin-bottom:11px;border-radius:8px;background:var(--surface);color:var(--muted);font-size:10px;line-height:1.5}
+        .protected-note strong{color:var(--text)}
+        .import-report{min-height:38px;padding:10px;margin-top:10px;border:1px solid var(--border);border-radius:8px;
+            background:var(--surface);color:var(--muted);font-size:10px;line-height:1.5;white-space:pre-line}
+        .import-report.success{border-color:#bce1d1;background:#f0faf6;color:var(--success)}
+        .import-report.error{border-color:#efcbd1;background:#fff5f6;color:var(--danger)}
+        details.form-section{margin-top:10px;border:1px solid var(--border);border-radius:12px;background:var(--surface);overflow:hidden}
+        details.form-section>summary{padding:13px 14px;background:var(--surface-2);font-size:12px;font-weight:800;cursor:pointer;user-select:none}
+        .section-content{padding:14px;border-top:1px solid var(--border)}
+        .section-intro{margin-bottom:13px}
+        .section-importer{padding:11px;margin-bottom:14px;border:1px dashed #cec7f5;border-radius:10px;background:#faf9ff}
+        .section-importer summary{color:var(--primary);font-size:10px;font-weight:800;cursor:pointer}
+        .section-importer-body{padding-top:11px}
+        .section-importer-help{margin:0 0 8px;color:var(--muted);font-size:9px;line-height:1.5}
+        .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        .field{display:flex;flex-direction:column;gap:6px;min-width:0}
+        .field-full{grid-column:1/-1}
+        .field>span{display:flex;justify-content:space-between;gap:8px;font-size:10px;font-weight:750}
+        .field small{color:var(--muted);font-size:9px;font-weight:500}
+        .input{width:100%;padding:10px 11px;border:1px solid var(--border);border-radius:9px;outline:none;
+            background:var(--surface);color:var(--text);font-size:12px;line-height:1.5;resize:vertical;transition:.16s ease}
+        .input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(101,88,232,.11)}
+        .input-compact{padding:8px 9px;font-size:11px}
+        .entry-list{display:flex;flex-direction:column;gap:11px}
+        .entry{padding:13px;border:1px solid var(--border);border-radius:11px;background:var(--surface-2)}
+        .entry-header{margin-bottom:11px}
+        .entry-header strong{color:var(--primary);font-size:10px;letter-spacing:.05em;text-transform:uppercase}
+        .remove{padding:2px;border:0;background:transparent;color:var(--danger);font-size:10px}
+        .empty{padding:18px 12px;border:1px dashed var(--border);border-radius:10px;color:var(--muted);font-size:10px;line-height:1.5;text-align:center}
+        .quality-card{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;padding:14px 16px;margin-bottom:11px}
+        .score{display:grid;place-items:center;width:62px;height:62px;border-radius:50%;background:#efedff;color:var(--primary);font-size:20px;font-weight:850}
+        .quality-card h3{margin:0 0 5px;font-size:13px}
+        .quality-card p{margin:0;color:var(--muted);font-size:10px;line-height:1.5}
+        .suggestions{padding:12px 15px;margin-bottom:11px;box-shadow:none}
+        .suggestions h3{margin:0 0 8px;font-size:12px}
+        .suggestions ul{display:grid;grid-template-columns:1fr 1fr;gap:7px 12px;padding:0;margin:0;list-style:none}
+        .suggestions li{color:var(--muted);font-size:10px;line-height:1.45}
+        .suggestions li::before{content:"→ ";color:var(--primary);font-weight:800}
+        .document-toolbar{margin:15px 2px 9px}
+        .document-toolbar h3{margin:0 0 4px;font-size:13px}
+        .pdf-options{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+        .page-size{width:auto;padding:7px 8px;font-size:11px}
+        .resume-viewport{position:relative;width:100%;overflow:hidden;border-radius:6px;
+            box-shadow:0 10px 30px rgba(28,39,68,.12);background:#fff}
+        .resume-viewport #resume-document{position:absolute;top:0;left:0;transform-origin:top left}
+        .disclaimer{margin:9px 12px 0;color:var(--muted);font-size:9px;line-height:1.5;text-align:center}
+        .linkedin-form{display:flex;flex-direction:column;gap:14px}
+        .profile{overflow:hidden}
+        .profile-banner{height:70px;background:linear-gradient(120deg,var(--primary),#a28deb)}
+        .profile-body{padding:0 23px 23px}
+        .avatar{display:grid;place-items:center;width:65px;height:65px;margin-top:-31px;border:4px solid var(--surface);
+            border-radius:50%;background:var(--primary);color:#fff;font-size:18px;font-weight:800}
+        .profile-body>h2{margin:8px 0 5px;font-size:20px}
+        .profile-headline{margin:0 0 6px;font-size:11px;line-height:1.5}
+        .profile-location{margin:0;color:var(--muted);font-size:9px}
+        .profile-section{padding-top:14px;margin-top:17px;border-top:1px solid var(--border)}
+        .profile-section h3{margin:0 0 8px;font-size:11px}
+        .profile-section>p{margin:0;color:var(--muted);font-size:10px;line-height:1.65;white-space:pre-wrap}
+        .profile-highlights{padding-left:16px;margin:7px 0 0}
+        .profile-highlights li{margin:3px 0;color:#424c60;font-size:10px;line-height:1.55}
+        .toast{position:fixed;left:50%;bottom:24px;z-index:1000;max-width:calc(100% - 30px);padding:10px 15px;border-radius:9px;
+            background:var(--text);color:#fff;font-size:11px;font-weight:700;opacity:0;pointer-events:none;
+            transform:translate(-50%,12px);transition:.2s ease}
+        .toast.show{opacity:1;transform:translate(-50%,0)}
+        @media(max-width:1000px){.workspace{grid-template-columns:1fr}}
+        @media(max-width:650px){
+            .app{padding:14px}.topbar{align-items:flex-start}.brand p,.save-status{display:none}
+            .main-nav{grid-template-columns:1fr}.nav-button small{display:none}.editor{padding:15px}
+            .form-grid,.suggestions ul{grid-template-columns:1fr}.field-full{grid-column:auto}
+            .document-toolbar{align-items:flex-start;flex-direction:column}
+        }
+    </style>
+
+    <!--
+        RESUME STYLES
+        Shared by the on-screen preview AND the PDF export.
+        Change the resume design here only.
+    -->
+    <style id="resume-styles">
+        #resume-document{
+            box-sizing:border-box;
+            background:#ffffff;
+            color:#1f2937;
+            font-family:Cambria,"Cambria Math",Georgia,"Times New Roman",serif;
+            font-size:10.5pt;
+            line-height:1.25;
+            padding:0.6in;
+            text-align:left;
+            -webkit-print-color-adjust:exact;
+            print-color-adjust:exact;
+        }
+        #resume-document *{box-sizing:border-box}
+
+        /* ---------- Header ---------- */
+        #resume-document .cv-header{text-align:center;margin-bottom:12pt}
+        #resume-document .cv-name{
+            margin:0 0 4pt;font-size:22pt;font-weight:700;line-height:1.1;
+            letter-spacing:.05em;text-transform:uppercase;color:#111827;
+        }
+        #resume-document .cv-title{margin:0 0 3pt;font-size:11pt;font-weight:700;color:#334155}
+        #resume-document .cv-contact{font-size:9.5pt;color:#334155}
+        #resume-document .cv-sep{padding:0 4pt;color:#94a3b8}
+
+        /* ---------- Section headings ---------- */
+        #resume-document .cv-section{margin-top:14pt}
+        #resume-document .cv-section:first-of-type{margin-top:0}
+        #resume-document .cv-heading{
+            margin:0 0 7pt;padding-bottom:2.5pt;
+            border-bottom:1.25px solid #111827;
+            font-size:13pt;font-weight:700;line-height:1.15;color:#111827;letter-spacing:.01em;
+        }
+
+        /* ---------- Summary: a separate, standalone block ---------- */
+        #resume-document .cv-summary{margin:0;text-align:justify;color:#1f2937}
+
+        /* ---------- Entries ---------- */
+        #resume-document .cv-entry + .cv-entry{margin-top:11pt}
+        #resume-document .cv-line{
+            display:flex;justify-content:space-between;align-items:baseline;gap:14pt;
+        }
+
+        /* Line 1: strongest bold subheading + bold dates */
+        #resume-document .cv-primary{font-size:11.3pt;font-weight:700;color:#111827}
+        #resume-document .cv-date{flex:none;font-size:10pt;font-weight:700;color:#111827;white-space:nowrap}
+
+        /* Line 2: lighter bold-italic subheading + italic location */
+        #resume-document .cv-line-sub{margin-top:1.5pt}
+        #resume-document .cv-secondary{font-size:10pt;font-weight:600;font-style:italic;color:#334155}
+        #resume-document .cv-place{flex:none;font-size:10pt;font-style:italic;color:#475569;white-space:nowrap;text-align:right}
+
+        /* Body content */
+        #resume-document .cv-body{margin-top:4pt}
+        #resume-document .cv-para{margin:0 0 3pt;text-align:justify}
+        #resume-document .cv-sublabel{margin:4pt 0 1pt;font-size:10.2pt;font-weight:700;color:#111827}
+        #resume-document .cv-bullets{margin:1pt 0 0;padding-left:15pt;list-style:disc outside}
+        #resume-document .cv-bullets li{margin:0 0 2pt;padding-left:1pt}
+        #resume-document .cv-bullets li::marker{color:#334155}
+
+        /* Skills and languages */
+        #resume-document .cv-label{font-weight:700;color:#111827}
+        #resume-document .cv-plain{margin:0}
+        #resume-document .cv-lines div{margin:0 0 2pt}
+
+        /* Placeholders: visible on screen only, removed from the PDF */
+        #resume-document .cv-ph{color:#94a3b8;font-style:italic}
+        #resume-document .cv-empty{margin:24pt 0;text-align:center;font-size:10pt}
+    </style>
+</head>
+
+<body>
+<main class="app">
+    <header class="topbar">
+        <div class="brand">
+            <div class="logo">CS</div>
+            <div>
+                <h1>Career Studio</h1>
+                <p>Header-based autofill and ATS resume generation</p>
+            </div>
+        </div>
+        <div class="actions">
+            <span class="save-status" id="save-status">Workspace ready</span>
+            <button class="btn" data-action="import-json">Import</button>
+            <button class="btn" data-action="export-json">Export</button>
+            <button class="btn btn-danger" data-action="new-resume">New Resume</button>
+            <button class="btn btn-danger" data-action="reset">Reset All</button>
+        </div>
+    </header>
+
+    <nav class="main-nav">
+        <button class="nav-button active" data-view="resume">
+            <span class="nav-icon">R</span>
+            <span><strong>Resume builder</strong><small>Document and section-level autofill</small></span>
+        </button>
+        <button class="nav-button" data-view="linkedin">
+            <span class="nav-icon">in</span>
+            <span><strong>LinkedIn optimizer</strong><small>Refine your professional positioning</small></span>
+        </button>
+    </nav>
+
+    <!-- RESUME BUILDER -->
+    <section id="resume-view">
+        <div class="workspace">
+            <section class="panel editor">
+                <div class="heading">
+                    <span class="eyebrow">ATS RESUME BUILDER</span>
+                    <h2>Build your professional resume</h2>
+                    <p>Autofill the entire document or import one section at a time.</p>
+                </div>
+
+                <section class="autoload-box">
+                    <h3>Autofill entire resume</h3>
+                    <p>Paste a complete resume. Recognized headers determine where each block of information belongs.</p>
+                    <div class="protected-note">
+                        <strong>Protected fields:</strong> Name, LinkedIn URL, phone number, and email are never
+                        overwritten by either autofill method.
+                    </div>
+                    <label class="field">
+                        <span>Complete resume text</span>
+                        <textarea class="input" id="global-source" rows="12"
+                            placeholder="Paste a complete resume containing headings such as SUMMARY, EDUCATION, EXPERIENCE, PROJECTS, CERTIFICATIONS, SKILLS, and LANGUAGES..."></textarea>
+                    </label>
+                    <div class="form-grid" style="margin-top:10px">
+                        <label class="field field-full">
+                            <span>Import behavior</span>
+                            <select class="input input-compact" id="import-mode">
+                                <option value="replace">Replace only the sections detected in the pasted text</option>
+                                <option value="append">Add imported entries to existing sections</option>
+                            </select>
+                        </label>
+                    </div>
+                    <div class="import-actions" style="margin-top:11px">
+                        <button class="btn btn-primary btn-small" data-action="autofill-document">Autofill entire resume</button>
+                        <button class="btn btn-small" data-action="clear-global">Clear pasted text</button>
+                    </div>
+                    <div class="import-report" id="global-report">
+                        Waiting for a complete resume. Undetected sections remain unchanged.
+                    </div>
+                </section>
+
+                <!-- HEADER -->
+                <details class="form-section" open>
+                    <summary>Header and contact information</summary>
+                    <div class="section-content">
+                        <p class="section-intro">Professional Title and Location can be detected from explicit labels. Protected fields cannot.</p>
+                        <div class="form-grid">
+                            <label class="field field-full"><span>Full name · protected</span>
+                                <input class="input" data-bind="resume.name" placeholder="Your full name"></label>
+                            <label class="field field-full"><span>Professional title (optional)</span>
+                                <input class="input" data-bind="resume.title" placeholder="Senior Data Analyst"></label>
+                            <label class="field"><span>Email · protected</span>
+                                <input class="input" type="email" data-bind="resume.email" placeholder="you@example.com"></label>
+                            <label class="field"><span>Phone · protected</span>
+                                <input class="input" data-bind="resume.phone" placeholder="+1 555 000 0000"></label>
+                            <label class="field"><span>LinkedIn URL · protected</span>
+                                <input class="input" data-bind="resume.website" placeholder="linkedin.com/in/yourname"></label>
+                            <label class="field"><span>Portfolio URL</span>
+                                <input class="input" data-bind="resume.portfolio" placeholder="yourportfolio.com"></label>
+                            <label class="field field-full"><span>Location / address</span>
+                                <input class="input" data-bind="resume.location" placeholder="City, State or full address"></label>
+                        </div>
+                    </div>
+                </details>
+
+                <!-- 1. SUMMARY -->
+                <details class="form-section" open>
+                    <summary>1. Summary</summary>
+                    <div class="section-content">
+                        <div class="section-importer" data-importer="summary"></div>
+                        <div class="form-grid">
+                            <label class="field field-full">
+                                <span>Professional summary <small id="summary-count">0 / 1,200</small></span>
+                                <textarea class="input" rows="7" maxlength="1200" data-bind="resume.summary" placeholder="Your professional summary"></textarea>
+                            </label>
+                            <label class="field field-full"><span>Target role</span>
+                                <input class="input" data-bind="targetRole" placeholder="Data Analyst"></label>
+                            <label class="field field-full"><span>Target keywords · comma separated</span>
+                                <textarea class="input" rows="3" data-bind="targetKeywords" placeholder="SQL, Power BI, forecasting"></textarea></label>
+                        </div>
+                    </div>
+                </details>
+
+                <!-- 2. EDUCATION -->
+                <details class="form-section">
+                    <summary>2. Education</summary>
+                    <div class="section-content">
+                        <div class="section-importer" data-importer="education"></div>
+                        <div class="section-actions">
+                            <p class="section-intro">Line 1: institution + dates. Line 2: degree · field · GPA + location.</p>
+                            <button class="btn btn-primary btn-small" data-add="education">+ Add</button>
+                        </div>
+                        <div class="entry-list" id="education-list"></div>
+                    </div>
+                </details>
+
+                <!-- 3. EXPERIENCE -->
+                <details class="form-section">
+                    <summary>3. Experience</summary>
+                    <div class="section-content">
+                        <div class="section-importer" data-importer="experience"></div>
+                        <div class="section-actions">
+                            <p class="section-intro">Line 1: company + dates. Line 2: job title · type + location.</p>
+                            <button class="btn btn-primary btn-small" data-add="experience">+ Add</button>
+                        </div>
+                        <div class="entry-list" id="experience-list"></div>
+                    </div>
+                </details>
+
+                <!-- 4. PROJECTS -->
+                <details class="form-section">
+                    <summary>4. Projects</summary>
+                    <div class="section-content">
+                        <div class="section-importer" data-importer="projects"></div>
+                        <div class="section-actions">
+                            <p class="section-intro">Line 1: project title + dates. Line 2: organization · tools + domain.</p>
+                            <button class="btn btn-primary btn-small" data-add="projects">+ Add</button>
+                        </div>
+                        <div class="entry-list" id="projects-list"></div>
+                    </div>
+                </details>
+
+                <!-- 5. CERTIFICATIONS -->
+                <details class="form-section">
+                    <summary>5. Certifications</summary>
+                    <div class="section-content">
+                        <div class="section-importer" data-importer="credentials"></div>
+                        <div class="section-actions">
+                            <p class="section-intro">Line 1: credential + dates. Line 2: issuer · credential ID.</p>
+                            <button class="btn btn-primary btn-small" data-add="credentials">+ Add</button>
+                        </div>
+                        <div class="entry-list" id="credentials-list"></div>
+                    </div>
+                </details>
+
+                <!-- 6. SKILLS -->
+                <details class="form-section">
+                    <summary>6. Skills</summary>
+                    <div class="section-content">
+                        <div class="section-importer" data-importer="skills"></div>
+                        <label class="field">
+                            <span>Professional skills · comma separated</span>
+                            <textarea class="input" rows="5" data-bind="resume.skills" placeholder="SQL, Power BI, Excel, forecasting"></textarea>
+                        </label>
+                    </div>
+                </details>
+
+                <!-- 7. LANGUAGES -->
+                <details class="form-section">
+                    <summary>7. Languages</summary>
+                    <div class="section-content">
+                        <div class="section-importer" data-importer="languages"></div>
+                        <div class="section-actions">
+                            <p class="section-intro">Shown as: English [Native Proficiency].</p>
+                            <button class="btn btn-primary btn-small" data-add="languages">+ Add</button>
+                        </div>
+                        <div class="entry-list" id="languages-list"></div>
+                    </div>
+                </details>
+            </section>
+
+            <!-- PREVIEW -->
+            <section>
+                <div class="panel quality-card">
+                    <div class="score" id="resume-score">0</div>
+                    <div>
+                        <h3 id="quality-title">Start building your resume</h3>
+                        <p id="keyword-status">Add target keywords to measure job-description alignment.</p>
+                    </div>
+                </div>
+
+                <div class="panel suggestions">
+                    <h3>Next best improvements</h3>
+                    <ul id="resume-suggestions"></ul>
+                </div>
+
+                <div class="document-toolbar">
+                    <div>
+                        <h3>ATS-friendly PDF</h3>
+                        <p>The PDF is printed from this exact preview: same fonts, bullets, and layout.</p>
+                    </div>
+                    <div class="pdf-options">
+                        <select class="input page-size" data-bind="settings.pageSize" aria-label="PDF page size">
+                            <option value="letter">US Letter</option>
+                            <option value="a4">A4</option>
+                        </select>
+                        <button class="btn btn-small" data-action="print">Print</button>
+                        <button class="btn btn-primary btn-small" data-action="download-pdf">Download PDF</button>
+                    </div>
+                </div>
+
+                <div class="resume-viewport" id="resume-viewport">
+                    <article id="resume-document"></article>
+                </div>
+
+                <p class="disclaimer">
+                    In the print dialog choose <strong>Save as PDF</strong> and turn off
+                    <strong>Headers and footers</strong>. Review autofilled content before submitting.
+                </p>
+            </section>
+        </div>
+    </section>
+
+    <!-- LINKEDIN -->
+    <section id="linkedin-view" hidden>
+        <div class="workspace">
+            <section class="panel editor">
+                <div class="heading">
+                    <span class="eyebrow">LINKEDIN OPTIMIZER</span>
+                    <h2>Turn your profile into a clear pitch</h2>
+                    <p>Target role and keywords stay synchronized with your resume.</p>
+                </div>
+                <div class="linkedin-form">
+                    <div class="form-grid">
+                        <label class="field"><span>Target role</span>
+                            <input class="input" data-bind="targetRole" placeholder="Product Designer"></label>
+                        <label class="field"><span>Industry</span>
+                            <input class="input" data-bind="linkedin.industry" placeholder="Fintech"></label>
+                        <label class="field field-full"><span>Target keywords</span>
+                            <textarea class="input" rows="3" data-bind="targetKeywords" placeholder="User research, prototyping"></textarea></label>
+                        <label class="field field-full"><span>Headline <small id="headline-count">0 / 220</small></span>
+                            <textarea class="input" rows="4" maxlength="220" data-bind="linkedin.headline"
+                                placeholder="Product Designer | B2B SaaS | Intuitive workflows"></textarea></label>
+                    </div>
+                    <button class="btn btn-small" data-action="suggest-headline" style="align-self:flex-start">Draft headline</button>
+                    <label class="field"><span>About <small id="about-count">0 / 2,600</small></span>
+                        <textarea class="input" rows="11" maxlength="2600" data-bind="linkedin.about"
+                            placeholder="Open with your value, support it with evidence, and invite contact..."></textarea></label>
+                    <label class="field"><span>Featured skills</span>
+                        <textarea class="input" rows="4" data-bind="linkedin.skills" placeholder="User research, product strategy, Figma"></textarea></label>
+                    <label class="field"><span>Experience highlights · one per line</span>
+                        <textarea class="input" rows="6" data-bind="linkedin.highlights"
+                            placeholder="Increased activation by 24% through redesigned onboarding"></textarea></label>
+                    <button class="btn btn-primary btn-small" data-action="copy-linkedin" style="align-self:flex-start">Copy LinkedIn content</button>
+                </div>
+            </section>
+
+            <article class="panel profile">
+                <div class="profile-banner"></div>
+                <div class="profile-body">
+                    <div class="avatar" id="linkedin-avatar">YN</div>
+                    <h2 id="linkedin-name">Your Name</h2>
+                    <p class="profile-headline" id="linkedin-headline"></p>
+                    <p class="profile-location" id="linkedin-location"></p>
+                    <section class="profile-section"><h3>About</h3><p id="linkedin-about"></p></section>
+                    <section class="profile-section"><h3>Featured skills</h3><p id="linkedin-skills"></p></section>
+                    <section class="profile-section"><h3>Selected impact</h3><ul class="profile-highlights" id="linkedin-highlights"></ul></section>
+                </div>
+            </article>
+        </div>
+    </section>
+</main>
+
+<div class="toast" id="toast" role="status"></div>
+<input id="workspace-file" type="file" accept=".json,application/json" hidden>
+
+<script src="script.js"></script>
+</body>
+</html>
